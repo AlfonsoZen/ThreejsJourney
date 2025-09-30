@@ -1,4 +1,22 @@
 import * as THREE from 'three'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+
+/**
+ * Cursor
+ */
+let cursor = {
+    clientX: 0,
+    clientY: 0
+    }
+
+window.addEventListener( 'mousemove', ({clientX, clientY}) => {
+    cursor = {
+        clientX: (clientX / sizes.width) - 0.5,
+        clientY: (clientY / sizes.height) - 0.5
+    }
+
+    console.log(cursor)
+})
 
 /**
  * Base
@@ -23,12 +41,43 @@ const mesh = new THREE.Mesh(
 scene.add(mesh)
 
 // Camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height)
-camera.position.x = 2
-camera.position.y = 2
-camera.position.z = 2
+const camera = new THREE.PerspectiveCamera(
+        75, // FOV (deg): Vertical vision angle
+        sizes.width / sizes.height, // Aspect Ratio: The width of the render divided by the height of the render
+        0.1, // Near: How close the camera can see
+        100 // Far: How far the camera can see
+
+        // Any object or part of the object closer than near or further than far will not show up
+    )
+// camera.position.x = 2
+// camera.position.y = 2
+camera.position.z = 3
 camera.lookAt(mesh.position)
 scene.add(camera)
+
+// Perspective Camera
+const aspectRatio = sizes.width / sizes.height;
+const orthographicCamera = new THREE.OrthographicCamera(
+        -aspectRatio, // Left
+        aspectRatio, // Right
+        1, // Top
+        -1, // Bottom
+        1, // Near
+        100 // Far
+    )
+
+orthographicCamera.position.set(2,2,2)
+orthographicCamera.lookAt(mesh.position)
+scene.add(orthographicCamera)
+
+/**
+ * Controls
+ */
+const controls = new OrbitControls(camera, canvas)
+// controls.target.y = 1
+
+// Damping
+controls.enableDamping = true;
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
@@ -44,13 +93,24 @@ const tick = () =>
     const elapsedTime = clock.getElapsedTime()
 
     // Update objects
-    mesh.rotation.y = elapsedTime;
+    // mesh.rotation.y = cursor.clientX;
+    // mesh.rotation.x = cursor.clientY;
+
+    // Custom Orbit Controls 
+    // camera.position.x = Math.sin(-cursor.clientX * Math.PI * 2) * 3;
+    // camera.position.z = Math.cos(cursor.clientX * Math.PI * 2) * 3;
+    // camera.position.y = cursor.clientY * 5;
+    // camera.lookAt(mesh.position)
 
     // Render
     renderer.render(scene, camera)
+    // renderer.render(scene, orthographicCamera)
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
+
+    // Update Controls
+    controls.update();
 }
 
 tick()

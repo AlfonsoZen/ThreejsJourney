@@ -215,3 +215,121 @@ const loop_3 = () => {
 loop_3()
 
 ```
+
+# Camera
+
+### Camera Class
+Is an abstract class for cameras (you're not supposed to use it directly). It's inherited to the rest of cameras when building one of them.
+
+### Array Camera
+`ArrayCamera` render the scene from multiple cameras on specific areas of the render
+
+### Stereo Camera
+`StereoCamera` renders the scene through two cameras that mimic the eyes to create a parallax effect. It's used with devides like VR headsets, red and blue glasses, or cardboards. 
+
+### Cube Camera
+The `CubeCamera` does 6 renders, each one facing a different direction. Can render the surrounding for things like environment maps, reflections, or shadow maps.
+
+### Orthographic Camera
+`OrthographicCamera` is used to render the scene without **perspective.** 
+
+```js
+// Perspective Camera
+const aspectRatio = sizes.width / sizes.height;
+const orthographicCamera = new THREE.OrthographicCamera(
+        -aspectRatio, // Left
+        aspectRatio, // Right
+        1, // Top
+        -1, // Bottom
+        1, // Near
+        100 // Far
+    )
+
+```
+
+### Perspective Camera
+`PerspectiveCamera` renders the scene with perspective.
+
+```js
+// Camera
+THREE.PerspectiveCamera(
+        75, // FOV (deg): Vertical vision angle
+        sizes.width / sizes.height, // Aspect Ratio: The width of the render divided by the height of the render
+        1, // Near: How close the camera can see
+        100 // Far: How far the camera can see
+
+        // Any object or part of the object closer than near or further than far will not show up
+    )
+```
+
+It's not recommended to use extreme values at the far nor near properties, as they can create the know glitch 'z-fighting'
+
+## Custom Controls (control the camera with the mouse)
+First, we need to fetch the coordinates of the cursor:
+```js
+/**
+ * Cursor
+ */
+let cursor = { 
+    clientX: 0,
+    clientY: 0
+    }
+
+window.addEventListener( 'mousemove', ({clientX, clientY}) => {
+    cursor = {
+        clientX: (clientX / sizes.width) - 0.5,
+        clientY: (clientY / sizes.height) - 0.5
+    }
+
+    console.log(cursor)
+})
+```
+
+Then modify the tick function with this values, thus creating a 360 rotating animation:
+```js
+const tick = () =>
+{
+    const elapsedTime = clock.getElapsedTime()
+
+    // Update objects
+    // mesh.rotation.y = cursor.clientX;
+    // mesh.rotation.x = cursor.clientY;
+
+    camera.position.x = Math.sin(-cursor.clientX * Math.PI * 2) * 3;
+    camera.position.z = Math.cos(cursor.clientX * Math.PI * 2) * 3;
+    camera.position.y = cursor.clientY * 5;
+    camera.lookAt(mesh.position)
+
+    // Render
+    renderer.render(scene, camera)
+    // renderer.render(scene, orthographicCamera)
+
+    // Call tick again on the next frame
+    window.requestAnimationFrame(tick)
+}
+```
+
+## Custom Controls
+- Fly Controls
+- First Person Control
+- Pointer Lock Controls
+- **Orbit Controls**
+```js
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+...
+/**
+ * Controls
+ */
+const controls = new OrbitControls(camera, canvas)
+// controls.target.y = 1
+
+// Damping
+controls.enableDamping = true;
+...
+const tick = () => {
+...
+    // Update Controls
+    controls.update();
+}
+```
+- Trackball controls
