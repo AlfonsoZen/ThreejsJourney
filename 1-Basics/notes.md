@@ -333,3 +333,39 @@ const tick = () => {
 }
 ```
 - Trackball controls
+
+# Fullscreen and resizing
+```js
+/**
+ * Sizes
+ */
+let sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight
+}
+
+window.addEventListener('resize', () => {
+    // Update sizes
+    sizes.width = window.innerWidth;
+    sizes.height = window.innerHeight;
+
+    // Update Camera
+    camera.aspect = sizes.width / sizes.height;
+    camera.updateProjectionMatrix();
+
+    // Update Renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+// Handle Fulll Screen
+window.addEventListener( 'dblclick', () => {
+    if( !document.fullscreenElement ) {
+        canvas.requestFullscreen();
+        console.log('no dbl click');
+    } else {
+        document.exitFullscreen();
+    }
+    
+})
+```
